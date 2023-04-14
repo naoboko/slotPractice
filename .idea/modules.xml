@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.github.naoboko.main.iml" filepath="$PROJECT_DIR$/.idea/modules/com.github.naoboko.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/naoboko.main.iml" filepath="$PROJECT_DIR$/.idea/modules/naoboko.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/naoboko.test.iml" filepath="$PROJECT_DIR$/.idea/modules/naoboko.test.iml" />
     </modules>
   </component>
 </project>

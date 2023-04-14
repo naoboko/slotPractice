@@ -1,0 +1,8 @@
+name: slotPractice
+version: '1.0'
+main: com.github.naoboko.SlotPractice
+api-version: 1.19
+
+commands:
+  setSlot:
+    description: スロットを設置します。

@@ -1,12 +1,17 @@
 package com.github.naoboko;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 
-public class SlotProcessing {
+public class SlotProcessing implements Listener {
     public static void slotProcesses(int bet, Player player) {
         /*乗数の決定*/
         int random = SlotPractice.getRandom().nextInt(256);
@@ -16,14 +21,18 @@ public class SlotProcessing {
     }
     @EventHandler
     public void getButtonLocation(PlayerInteractEvent e) {
-        Block block = e.getClickedBlock();
-        Player player = e.getPlayer();
-        if (block == /*ボタン*/) {
-            Location loc = block.getLocation();
-            /*configにLocationのほか、そのスロットのbetも保存しておいて、呼び出せるようにしたい.*/
-            /*仮称*/SlotData sd = SlotData.getSlotData();
-            if (loc == sd.getLocation()) {
-                slotProcesses(sd.getSlotBet(), player);
+        if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+            Block block = e.getClickedBlock();
+            Player player = e.getPlayer();
+            if (block != null && block.getType() == Material.OAK_BUTTON) {
+                player.sendMessage(Component.text("buriburi", TextColor.color(255,0,0)));
+                /*Location loc = block.getLocation();*/
+                /*configにLocationのほか、そのスロットのbetも保存しておいて、呼び出せるようにしたい.*/
+                /*仮称*/
+                /*SlotData sd = SlotData.getSlotData();
+                if (loc == sd.getLocation()) {
+                    slotProcesses(sd.getSlotBet(), player);
+                }*/
             }
         }
     }

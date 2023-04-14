@@ -1,5 +1,6 @@
 package com.github.naoboko;
 
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Random;
@@ -9,8 +10,8 @@ public final class SlotPractice extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        // Plugin startup logic
-
+        getCommand("setSlot").setExecutor(new SlotCommand());
+        Bukkit.getPluginManager().registerEvents(new SlotProcessing(),this);
     }
 
     @Override
