@@ -1,0 +1,4 @@
+name: slotPractice
+version: '${version}'
+main: com.github.naoboko.SlotPractice
+api-version: 1.19
