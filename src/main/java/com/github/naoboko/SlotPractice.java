@@ -8,6 +8,12 @@ import java.util.Random;
 
 public final class SlotPractice extends JavaPlugin {
     private static final Random RANDOM_INSTANCE = new Random();
+    private static SlotPractice INSTANCE;
+
+    @Override
+    public void onLoad() {
+        SlotPractice.INSTANCE = this;
+    }
 
     @Override
     public void onEnable() {
@@ -22,5 +28,9 @@ public final class SlotPractice extends JavaPlugin {
 
     public static Random getRandom() {
         return RANDOM_INSTANCE;
+    }
+
+    public static SlotPractice getInstance() {
+        return INSTANCE;
     }
 }

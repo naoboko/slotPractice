@@ -18,6 +18,8 @@ public class SlotCommand {
             NewMessageUtil.sendMessage(ctx.getSource(),Component.text("ﾌﾞﾂﾁﾁﾌﾞﾁﾁ", DefinedTextColor.DARK_RED));
             return 0;
         });
+
+        //todo 一覧を見る機能、消す機能を実装
         dispatcher.register(builder);
     }
 }

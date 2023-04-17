@@ -1,8 +1,5 @@
 package com.github.naoboko;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -14,6 +11,23 @@ import org.bukkit.event.player.PlayerInteractEvent;
 public class SlotProcessing implements Listener {
     static int[][] wools = new int[2][2];
     static boolean duplicate = false;
+    static SlotInfo[] slotInfos = new SlotInfo[SlotConfigSerializer.];
+
+    @EventHandler
+    public void slotStarts(PlayerInteractEvent e) {
+        if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+            Block block = e.getClickedBlock();
+            Player player = e.getPlayer();
+            if (block != null && block.getType() == Material.OAK_BUTTON) {
+                //どうやってスロットのロケーションを引っ張ってくる？(設定名とか無いので)
+                //案：通し番号を付ける、鯖読み込み時にメモリに引っ張り出す、ここでそれと比較する
+                if (/*スロットロケーション==現在のロケーション*/) {
+                    int bet = SlotConfigSerializer.getGameInfo("slot", Config.getConfig(), ).getBet();
+                    slotProcesses(bet, player);
+                }
+            }
+        }
+    }
 
     public static void slotProcesses(int bet, Player player) {
         /*乗数の決定*/
@@ -47,17 +61,6 @@ public class SlotProcessing implements Listener {
         }
     }
 
-    @EventHandler
-    public void getButtonLocation(PlayerInteractEvent e) {
-        if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            Block block = e.getClickedBlock();
-            Player player = e.getPlayer();
-            if (block != null && block.getType() == Material.OAK_BUTTON) {
-                player.sendMessage(Component.text("buriburi", TextColor.color(255, 0, 0)));
-            }
-        }
-    }
-
     public static int bigLottery() {
         int ranBig = SlotPractice.getRandom().nextInt(3);
         if (ranBig == 1) return 1;
@@ -66,21 +69,47 @@ public class SlotProcessing implements Listener {
 
     public static void slotSetWoolSystem(int ranCase) {
         /*配列に格納,数字と羊毛の色を対応させて配列の中身を変更
-         * 0=white,1=lightblue,2=yellow,3=green,4=purple,5=pink,6=red,7=blue,8=blue*/
+         * 0=white,1=lightblue,2=yellow,3=green,4=purple,5=pink,6=red,7=blue,8=black
+         * */
         int randFills = 0;
 
-        for (int i = 0; i <= 2; i++) {
+        /*配列の中身を乱数で置換*/
+        for (int i = 0; i <= 2; i++) { /*iが高さ、jが幅方向*/
             for (int j = 0; j <= 2; j++) {
                 randFills = SlotPractice.getRandom().nextInt(4);
                 wools[i][j] = randFills;
+
+                /*上、下リールでの子役成立を禁止*/
+                if (j == 2) {
+                    if ((wools[0][j] == wools[1][j]) && (wools[1][j] == wools[2][j])) {
+                        if (wools[0][j] != 0) wools[1][j] = 0;
+                        else wools[1][j] = 1;
+                    }
+                }
+
+                /*縦方向に揃うことの禁止*/
+                if (i == 2) {
+                    for (int k = 0; k <= 2; k++) {
+                        if ((wools[k][0] == wools[k][1]) && (wools[k][1] == wools[k][2])) {
+                            if (wools[k][0] != 0) wools[k][1] = 0;
+                            else wools[k][1] = 1;
+                        }
+                    }
+                }
             }
         }
+
+        /*横一列に同じブロックが来ないように調整*/
+
         switch (ranCase) {
-            case 1:
-                slotWoolOverwrite(7);
-                break;
-            case 2:
-                slotWoolOverwrite(6);
+            case 1 -> slotWoolOverwrite(7); /*7=blue=青七*/
+            case 2 -> slotWoolOverwrite(6); /*6=red=赤七*/
+            case 3 -> slotWoolOverwrite(8); /*8=black=BAR*/
+            case 4 -> slotWoolOverwrite(4); /*4=purple=チャンス目*/
+            case 5 -> slotWoolOverwrite(3); /*3=green=スイカ*/
+            case 6 -> slotWoolOverwrite(5); /*5=pink=チェリー*/
+            case 7 -> slotWoolOverwrite(2); /*2=yellow=ベル*/
+            case 8 -> slotWoolOverwrite(1); /*1=lightblue=リプレイ*/
         }
     }
 
