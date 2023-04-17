@@ -10,20 +10,20 @@ import org.bukkit.event.player.PlayerInteractEvent;
 
 public class SlotProcessing implements Listener {
     static int[][] wools = new int[2][2];
-    static boolean duplicate = false;
-    static SlotInfo[] slotInfos = new SlotInfo[SlotConfigSerializer.];
+    private static boolean duplicate = false;
 
+    //イベント検知
     @EventHandler
     public void slotStarts(PlayerInteractEvent e) {
-        if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+        if (e.getAction() == Action.RIGHT_CLICK_BLOCK) { /*もし右クリックをしたら*/
             Block block = e.getClickedBlock();
             Player player = e.getPlayer();
-            if (block != null && block.getType() == Material.OAK_BUTTON) {
-                //どうやってスロットのロケーションを引っ張ってくる？(設定名とか無いので)
-                //案：通し番号を付ける、鯖読み込み時にメモリに引っ張り出す、ここでそれと比較する
-                if (/*スロットロケーション==現在のロケーション*/) {
-                    int bet = SlotConfigSerializer.getGameInfo("slot", Config.getConfig(), ).getBet();
-                    slotProcesses(bet, player);
+            if (block != null && block.getType() == Material.OAK_BUTTON) { /*右クリック対象がオークのボタンなら*/
+                for (int i = 1; i <= SlotConfigSerializer.getSlotAmount(); i++) { /*スロットの設置数だけループ*/
+                    SlotInfo slotInfo = SlotConfigSerializer.getGameInfo("slot", Config.getConfig(), i);
+                    if (block.getLocation() == slotInfo.getLocation()){ /*ブロックのロケーションがスロットのロケーションと同じなら(yaw,pitchは？)*/
+                        slotProcesses(slotInfo.getBet(), player); /*processを発火*/
+                    }
                 }
             }
         }
@@ -31,7 +31,7 @@ public class SlotProcessing implements Listener {
 
     public static void slotProcesses(int bet, Player player) {
         /*乗数の決定*/
-        if (duplicate) {
+        if (duplicate) { /*前ゲームで重複があればイベント発火*/
             slotSetWoolSystem(bigLottery());
             slotWin(bet, bigLottery(), player);
             duplicate = false;
@@ -39,7 +39,7 @@ public class SlotProcessing implements Listener {
             int random = SlotPractice.getRandom().nextInt(255);
             int ranCase = 0;
 
-            /*子役重複なし、チャンス目重複あり(1/3)*/
+            /*子役重複なし、チャンス目重複あり(1/3)、確率未定*/
             if (random == 1) ranCase = bigLottery();
             else if (random >= && random <=) ranCase = 3; /*小当たり*/
             else if (random >= && random <=) { /*チャ目、1/3で重複*/
@@ -61,13 +61,13 @@ public class SlotProcessing implements Listener {
         }
     }
 
-    public static int bigLottery() {
+    public static int bigLottery() { /*1/256の大当たりの振り分け抽選*/
         int ranBig = SlotPractice.getRandom().nextInt(3);
         if (ranBig == 1) return 1;
         else return 2;
     }
 
-    public static void slotSetWoolSystem(int ranCase) {
+    public static void slotSetWoolSystem(int ranCase) { /*ブロック設置関数*/
         /*配列に格納,数字と羊毛の色を対応させて配列の中身を変更
          * 0=white,1=lightblue,2=yellow,3=green,4=purple,5=pink,6=red,7=blue,8=black
          * */
@@ -80,10 +80,10 @@ public class SlotProcessing implements Listener {
                 wools[i][j] = randFills;
 
                 /*上、下リールでの子役成立を禁止*/
-                if (j == 2) {
-                    if ((wools[0][j] == wools[1][j]) && (wools[1][j] == wools[2][j])) {
-                        if (wools[0][j] != 0) wools[1][j] = 0;
-                        else wools[1][j] = 1;
+                if (j == 2) { /*横方向処理終わったら*/
+                    if ((wools[0][j] == wools[1][j]) && (wools[1][j] == wools[2][j])) { /*A=B&&B=CならA=C&&A=B=C*/
+                        if (wools[0][j] != 0) wools[1][j] = 0; /*ハズレ目以外ならハズレ目で*/
+                        else wools[1][j] = 1; /*ハズレ目ならリプレイに*/
                     }
                 }
 
@@ -99,9 +99,7 @@ public class SlotProcessing implements Listener {
             }
         }
 
-        /*横一列に同じブロックが来ないように調整*/
-
-        switch (ranCase) {
+        switch (ranCase) { /*成立役に応じてリール情報を上書き*/
             case 1 -> slotWoolOverwrite(7); /*7=blue=青七*/
             case 2 -> slotWoolOverwrite(6); /*6=red=赤七*/
             case 3 -> slotWoolOverwrite(8); /*8=black=BAR*/
@@ -119,9 +117,12 @@ public class SlotProcessing implements Listener {
 
     public static void slotLose(int bet, Player player) {
         /*負けた処理*/
+        /*tax-bet*/
     }
 
     public static void slotWin(int bet, int ranCase, Player player) {
         /*勝った処理*/
+        /*ranCaseに応じて配当倍率を変更(未定)*/
+        /*tax - (win - bet)*/
     }
 }

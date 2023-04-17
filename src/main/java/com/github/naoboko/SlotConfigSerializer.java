@@ -10,7 +10,7 @@ import java.util.Arrays;
 public class SlotConfigSerializer {
     private static final String[] VALUES = new String[]{"world","x","y","z","bet"};
 
-    public static void setInfo(String gameName, FileConfiguration config, int gameNumber, Location loc, int bet) {
+    public static void setGameInfo(String gameName, FileConfiguration config, int gameNumber, Location loc, int bet) {
         Arrays.stream(VALUES).forEach(s -> config.set(gameName + "." + gameNumber + "." + s, SlotConfigSerializer.get(s, loc, bet)));
     }
 
@@ -43,8 +43,13 @@ public class SlotConfigSerializer {
         }
         return new SlotInfo(new Location(Bukkit.getWorld(worldName),x,y,z), bet);
     }
+
+    public static int getSlotAmount() {
+        return Config.getConfig().getInt("slotAmount");
+    }
 }
 
+/*これも意味わからん、自分なりに変えたけどあってる？*/
 class SlotInfo {
     private final Location location;
     private final int bet;

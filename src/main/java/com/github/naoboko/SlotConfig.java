@@ -5,6 +5,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 
+/*このへんよくわからん、ほぼパクりです*/
 public class SlotConfig {
     private static final File configFile = new File(SlotPractice.getInstance().getDataFolder(), "config.yml");
     private static FileConfiguration config;
