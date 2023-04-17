@@ -27,8 +27,8 @@ repositories {
 
 dependencies {
     paperweightDevelopmentBundle("io.papermc.paper:dev-bundle:1.19.3-R0.1-SNAPSHOT")
-    compileOnly group: 'net.unknown', name: 'UnknownNetworkCore', version: '+'
     compileOnly group: 'com.github.MilkBowl', name: 'VaultAPI', version: '+'
+    compileOnly fileTree(dir: "libs", include: "*.jar")
 }
 
 def targetJavaVersion = 17

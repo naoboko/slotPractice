@@ -1,5 +1,6 @@
 package com.github.naoboko;
 
+import net.unknown.UnknownNetworkCore;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -10,8 +11,8 @@ public final class SlotPractice extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        getCommand("setSlot").setExecutor(new SlotCommand());
         Bukkit.getPluginManager().registerEvents(new SlotProcessing(),this);
+        SlotCommand.register(UnknownNetworkCore.getBrigadier());
     }
 
     @Override
