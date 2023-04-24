@@ -55,11 +55,14 @@ public class SlotCommand {
                 })));
         dispatcher.register(builder);
 
-        LiteralArgumentBuilder<CommandSourceStack> builder1 = LiteralArgumentBuilder.literal("slotDebug");
-                builder1.requires(ctx -> ctx.hasPermission(4)).executes(ctx -> {
-                    SlotProcessing.debug();
+        LiteralArgumentBuilder<CommandSourceStack> debugBuilder = LiteralArgumentBuilder.literal("slotDebug");
+                debugBuilder.requires(ctx -> ctx.hasPermission(4)).executes(ctx -> {
+                    SlotProcessing.debug(ctx.getSource().getPlayer().getBukkitEntity());
                     return 0;
                 });
-        dispatcher.register(builder1);
+        dispatcher.register(debugBuilder);
+
+        //todo slotGeneralInfoみたいなコマンドを実装、全台の返金倍率を変えられるように
+        //todo slotBetChangeみたなコマンドを実装、設置されたスロットのbetをid指定で直接変えられるように setBetの出番きたねこれ
     }
 }

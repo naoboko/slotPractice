@@ -2,7 +2,6 @@ package com.github.naoboko;
 
 import net.kyori.adventure.text.Component;
 import net.milkbowl.vault.economy.Economy;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
@@ -10,7 +9,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.unknown.core.util.MessageUtil;
+import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.core.util.NewMessageUtil;
 import org.bukkit.Location;
@@ -21,7 +20,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.checkerframework.checker.units.qual.C;
 
 public class SlotProcessing implements Listener {
 
@@ -31,6 +29,7 @@ public class SlotProcessing implements Listener {
         if (e.getAction() == Action.RIGHT_CLICK_BLOCK) { /*もし右クリックをしたら*/
             Block block = e.getClickedBlock();
             if (block != null && block.getType() == Material.OAK_BUTTON) { /*右クリック対象がオークのボタンなら*/
+                //todo もう一個条件を足す、ボタンが押されていない状態なら
                 Slot slot = Slots.getSlotAt(block.getLocation());
                 slotProcesses(e.getPlayer(), slot);
             }
@@ -41,7 +40,7 @@ public class SlotProcessing implements Listener {
         /*乗数の決定*/
         if (slot.isDuplicated()) { /*前ゲームで重複があればイベント発火*/
             int bigLott = bigLottery();
-            slotSetWoolSystem(bigLott, slot);
+            slotSetWoolSystem(player, bigLott, slot, Result.WIN);
             slotWin(slot.getBet(), bigLott, player);
             slot.setDuplicate(false);
         } else {
@@ -62,13 +61,7 @@ public class SlotProcessing implements Listener {
             else if (random >= 41 && random <= 104) ranCase = 8; //空色羊毛 64/256
             else ranCase = 9; /*はずれ*/
 
-            if (ranCase == 9) {
-                slotSetWoolSystem(ranCase, slot);
-                slotLose(slot.getBet(), player);
-            } else {
-                slotSetWoolSystem(ranCase, slot);
-                slotWin(slot.getBet(), ranCase, player);
-            }
+            slotSetWoolSystem(player, ranCase, slot, ranCase == 9 ? Result.LOSE : Result.WIN);
         }
     }
 
@@ -78,10 +71,9 @@ public class SlotProcessing implements Listener {
         else return 2;
     }
 
-    public static void slotSetWoolSystem(int ranCase, Slot slot) { /*ブロック設置関数*/
-        /*配列に格納,数字と羊毛の色を対応させて配列の中身を変更
-         * 0=white,1=lightblue,2=yellow,3=green,4=purple,5=pink,6=red,7=blue,8=black
-         * */
+    public static void slotSetWoolSystem(Player player, int ranCase, Slot slot, Result result) { /*ブロック設置関数*/
+        //配列に格納,数字と羊毛の色を対応させて配列の中身を変更
+        //0=white,1=lightblue,2=yellow,3=green,4=purple,5=pink,6=red,7=blue,8=black
         int randFills;
         int[][] wools = new int[3][3];
 
@@ -91,6 +83,19 @@ public class SlotProcessing implements Listener {
                 randFills = SlotPractice.getRandom().nextInt(4);
                 wools[w][h] = randFills;
             }
+        }
+        for (int h = 0; h <= 2; h++) {
+            //縦方向の子役成立を禁止
+            if ((wools[0][h]== wools[2][h])) {
+                if (wools[0][0] == 7) wools[2][h] = 7; //すでに書き換えが起こっていた場合、赤が中段に成立していた時に縦方向に揃ってしまうので、それを回避したい
+                else wools[0][h] = 7;
+            }
+            //横方向の子役成立を禁止
+            if ((wools[h][0] == wools[h][2])) {
+                if (wools[0][0] == 6) wools[h][1] = 6;
+                else wools[h][0] = 6;
+            }
+            //todo 斜めぞろいの禁止 woolsを8に書き換え
         }
 
         switch (ranCase) { /*成立役に応じてリール情報を上書き*/
@@ -103,30 +108,7 @@ public class SlotProcessing implements Listener {
             case 7 -> wools = slotWoolOverwrite(2, wools); /*2=yellow=ベル*/
             case 8 -> wools = slotWoolOverwrite(1, wools); /*1=lightblue=リプレイ*/
         }
-
-        for (int h = 0; h <= 2; h++) {
-            for (int w = 0; w <= 2; w++) {
-                // 上、下リールでの子役成立を禁止
-                if (w == 2) { // 横方向処理終わったら
-                    if ((wools[w][0] == wools[w][1]) && (wools[w][1] == wools[w][2])) { // A=B&&B=CならA=C&&A=B=C
-                        if (wools[w][0] != 0) wools[w][0] = 0; // ハズレ目以外ならハズレ目で
-                        else wools[w][0] = 1; // ハズレ目ならリプレイに
-                    }
-                }
-
-                /*縦方向に揃うことの禁止*/
-                if (h == 2) {
-                    for (int k = 0; k <= 2; k++) {
-                        if ((wools[0][k] == wools[1][k]) && (wools[1][k] == wools[2][k])) {
-                            if (wools[0][k] != 0) wools[0][k] = 0;
-                            else wools[0][k] = 1;
-                        }
-                    }
-                }
-            }
-        }
-
-        replaceWools(wools, slot);
+        replaceWools(player, wools, ranCase, slot, result);
     }
 
     public static int[][] slotWoolOverwrite(int num, int[][] wools) {
@@ -134,7 +116,7 @@ public class SlotProcessing implements Listener {
         return wools;
     }
 
-    public static void replaceWools(int[][] wools, Slot slot) {
+    public static void replaceWools(Player player, int[][] wools, int ranCase, Slot slot, Result result) {
         Location buttonLoc = slot.getLocation();
         Level level = MinecraftAdapter.level(buttonLoc.getWorld());
         BlockPos pos = MinecraftAdapter.blockPos(buttonLoc);
@@ -163,16 +145,34 @@ public class SlotProcessing implements Listener {
                         case 0 -> woolColor = Blocks.WHITE_WOOL.defaultBlockState();
                         case 1 -> woolColor = Blocks.LIGHT_BLUE_WOOL.defaultBlockState();
                         case 2 -> woolColor = Blocks.YELLOW_WOOL.defaultBlockState();
-                        case 3 -> woolColor = Blocks.GRAY_WOOL.defaultBlockState();
-                        case 4 -> woolColor = Blocks.PURPLE_WOOL.defaultBlockState();
+                        case 3 -> woolColor = Blocks.LIME_WOOL.defaultBlockState();
+                        case 4 -> woolColor = Blocks.MAGENTA_WOOL.defaultBlockState();
                         case 5 -> woolColor = Blocks.PINK_WOOL.defaultBlockState();
                         case 6 -> woolColor = Blocks.RED_WOOL.defaultBlockState();
                         case 7 -> woolColor = Blocks.BLUE_WOOL.defaultBlockState();
                         case 8 -> woolColor = Blocks.BLACK_WOOL.defaultBlockState();
                     }
-                    level.setBlock(reelPos[h][w], woolColor, net.minecraft.world.level.block.Block.UPDATE_ALL);
+
+                    if (h != 0) {
+                        int finalW = w;
+                        int finalH = h;
+                        BlockState finalWoolColor = woolColor;
+                        RunnableManager.runDelayed(() -> {
+                            level.setBlock(reelPos[finalH][finalW], finalWoolColor, net.minecraft.world.level.block.Block.UPDATE_ALL);
+                        }, (h * 2) * 3);
+                    } else {
+                        level.setBlock(reelPos[h][w], woolColor, net.minecraft.world.level.block.Block.UPDATE_ALL);
+                    }
                 }
+                //todo noteBlockの音を再生したいです。Result == Loseの音とWINの音をわける(三回目のみ)Bukkit.playSoundみたいなの使う
             }
+            RunnableManager.runDelayed(() -> {
+                if (result == Result.WIN) {
+                    slotWin(slot.getBet(), ranCase, player);
+                } else {
+                    slotLose(slot.getBet(), player);
+                }
+            }, 12L);
         }
     }
 
@@ -186,8 +186,9 @@ public class SlotProcessing implements Listener {
 
     public static void slotWin(int bet, int ranCase, Player player) {
         double calculated = bet;
-
-        switch (ranCase) { //todo 分母より返金額をちっちゃくする
+        //todo configから返金倍率を持ってくる
+        //todo 分母より返金額をちっちゃくする
+        switch (ranCase) {
             case 1 -> calculated = bet * 150; //大当たり青
             case 2 -> calculated = bet * 100; //大当たり赤
             case 3 -> calculated = bet * 80; //小当たり
@@ -202,10 +203,15 @@ public class SlotProcessing implements Listener {
         Economy econ = SlotPractice.getEconomy();
         econ.bankDeposit(player.getName(), (calculated - bet));
         econ.bankWithdraw("Tax", (calculated - bet));
+
         NewMessageUtil.sendMessage(player, Component.text("当選おめでとう！払戻金は" + calculated + "円です！"));
     }
 
-    public static void debug() {
+    public enum Result {
+        WIN, LOSE
+    }
+
+    public static void debug(Player player) {
         int[][] tests = new int[3][3];
         int j = 0;
         for (int h = 0; h <= 2; h++) {
@@ -214,6 +220,6 @@ public class SlotProcessing implements Listener {
                 j++;
             }
         }
-        replaceWools(tests, Slots.getSlotAt(1));
+        replaceWools(player, tests,9, Slots.getSlotAt(1), Result.LOSE);
     }
 }

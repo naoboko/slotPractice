@@ -1,1 +1,11 @@
-slots: {}
+slots:
+  '1':
+    button-location:
+      world: world
+      x: 1268.0
+      y: 74.0
+      z: 871.0
+      yaw: 0.0
+      pitch: 0.0
+    bet: 10
+    duplicate: false
