@@ -86,16 +86,24 @@ public class SlotProcessing implements Listener {
         }
         for (int h = 0; h <= 2; h++) {
             //縦方向の子役成立を禁止
-            if ((wools[0][h]== wools[2][h])) {
+            if (wools[0][h]== wools[2][h]) {
                 if (wools[0][0] == 7) wools[2][h] = 7; //すでに書き換えが起こっていた場合、赤が中段に成立していた時に縦方向に揃ってしまうので、それを回避したい
                 else wools[0][h] = 7;
             }
             //横方向の子役成立を禁止
-            if ((wools[h][0] == wools[h][2])) {
+            if (wools[h][0] == wools[h][2]) {
                 if (wools[0][0] == 6) wools[h][1] = 6;
                 else wools[h][0] = 6;
             }
-            //todo 斜めぞろいの禁止 woolsを8に書き換え
+            //斜めぞろいの禁止
+            if (wools[0][0] == wools[2][2]) {
+                //この三項演算子はあとで中段が8に置き換わる場合は、斜めぞろい禁止を6で置き換えようとしているやつです
+                wools[2][2] = ranCase == 8 ? 6 : 8;
+            }
+            if (wools[0][2] == wools[2][0]) {
+                wools[2][0] = ranCase == 8 ? 7 : 8;
+            }
+
         }
 
         switch (ranCase) { /*成立役に応じてリール情報を上書き*/
