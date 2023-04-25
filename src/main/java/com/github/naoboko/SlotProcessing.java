@@ -197,13 +197,13 @@ public class SlotProcessing implements Listener {
         //todo configから返金倍率を持ってくる
         //todo 分母より返金額をちっちゃくする
         switch (ranCase) {
-            case 1 -> calculated = bet * 150; //大当たり青
-            case 2 -> calculated = bet * 100; //大当たり赤
-            case 3 -> calculated = bet * 80; //小当たり
-            case 4 -> calculated = bet * 5; //チャ目
-            case 5 -> calculated = bet * 3; //スイカ
-            case 6 -> calculated = bet * 1.5; //チェリー
-            case 7 -> calculated = bet * 3; //ベル
+            case 1 -> calculated = bet * GlobalSlotConstants.getBlueMultiplier(); //大当たり青
+            case 2 -> calculated = bet * GlobalSlotConstants.getRedMultiplier(); //大当たり赤
+            case 3 -> calculated = bet * GlobalSlotConstants.getBlackMultiplier(); //小当たり
+            case 4 -> calculated = bet * GlobalSlotConstants.getMagentaMultiplier(); //チャ目
+            case 5 -> calculated = bet * GlobalSlotConstants.getLimeMultiplier(); //スイカ
+            case 6 -> calculated = bet * GlobalSlotConstants.getPinkMultiplier(); //チェリー
+            case 7 -> calculated = bet * GlobalSlotConstants.getYellowMultiplier(); //ベル
             case 8 -> {
             } //リプレイ
         }

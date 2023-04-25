@@ -2,6 +2,7 @@ package com.github.naoboko;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -23,7 +24,7 @@ import org.checkerframework.checker.units.qual.N;
 public class SlotCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralArgumentBuilder<CommandSourceStack> builder = LiteralArgumentBuilder.literal("Slot");
-        builder.then(Commands.literal("list").executes(ctx -> {
+        builder.requires(ctx -> ctx.hasPermission(4)).then(Commands.literal("list").executes(ctx -> {
             Slots.getSlots().forEach(slot -> {
                 Location loc = slot.getLocation();
                 NewMessageUtil.sendMessage(ctx.getSource(), Component.text("id=" + slot.getId() + ", world=" + loc.getWorld().getName() + ", x=" + loc.getBlockX() + ", y=" + loc.getBlockY() + ", z=" + loc.getBlockZ() + ", bet=" + slot.getBet()));
@@ -52,7 +53,23 @@ public class SlotCommand {
                 .executes(ctx -> {
                     Slots.removeSlot(IntegerArgumentType.getInteger(ctx, "id"));
                     return 0;
-                })));
+                })))
+                .then(Commands.literal("multiplier")
+                        .then(Commands.literal("show").executes(ctx -> {
+                            //todo 倍率を返すコマンドを実装
+                            return 0;
+                        }))
+                        .then(Commands.literal("set").then(Commands.argument("id", IntegerArgumentType.integer(1))
+                                .then(Commands.argument("wool-color", StringArgumentType.string()).suggests((ctx, suggestBuilder) -> {
+                                            //todo idのサジェストみたいにwool-colorのサジェストを出す, こういうときにenumに一覧作っておけばいいんですか？
+                                            return suggestBuilder.buildFuture();
+                                        })
+                                .then(Commands.argument("multiplier", IntegerArgumentType.integer()).executes(ctx -> {
+
+                                    //todo configに書き込む
+                                    return 0;
+                                }))))));
+
         dispatcher.register(builder);
 
         LiteralArgumentBuilder<CommandSourceStack> debugBuilder = LiteralArgumentBuilder.literal("slotDebug");
