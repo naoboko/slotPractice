@@ -12,6 +12,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.core.util.NewMessageUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -167,12 +168,13 @@ public class SlotProcessing implements Listener {
                         BlockState finalWoolColor = woolColor;
                         RunnableManager.runDelayed(() -> {
                             level.setBlock(reelPos[finalH][finalW], finalWoolColor, net.minecraft.world.level.block.Block.UPDATE_ALL);
+                            playSound(player, slot, result, finalH);
                         }, (h * 2) * 3);
                     } else {
                         level.setBlock(reelPos[h][w], woolColor, net.minecraft.world.level.block.Block.UPDATE_ALL);
+                        playSound(player, slot, result, h);
                     }
                 }
-                //todo noteBlockの音を再生したいです。Result == Loseの音とWINの音をわける(三回目のみ)Bukkit.playSoundみたいなの使う
             }
             RunnableManager.runDelayed(() -> {
                 if (result == Result.WIN) {
@@ -181,6 +183,17 @@ public class SlotProcessing implements Listener {
                     slotLose(slot.getBet(), player);
                 }
             }, 12L);
+        }
+    }
+
+    public static void playSound(Player player, Slot slot, Result result, int i) {
+        //スロットの周りに再生
+        if (result == Result.WIN && i == 2) {
+            //当選音
+        } else if (result == Result.LOSE && i != 2) {
+            //ダメだった時の音
+        } else {
+            //1,2リール目の停止音
         }
     }
 
