@@ -187,12 +187,17 @@ public class SlotProcessing implements Listener {
     }
 
     public static void playSound(Player player, Slot slot, Result result, int i) {
+        Location loc = slot.getLocation();
         //スロットの周りに再生
         if (result == Result.WIN && i == 2) {
+            //player.playSound(loc, );
             //当選音
         } else if (result == Result.LOSE && i != 2) {
+            //player.playSound(loc, );
             //ダメだった時の音
         } else {
+            //player.playSound(loc, note_block, volume, pitch);
+            //todo 各パラメータの指定方法
             //1,2リール目の停止音
         }
     }
