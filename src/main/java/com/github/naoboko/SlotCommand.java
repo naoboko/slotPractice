@@ -5,21 +5,12 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
-import net.minecraft.commands.arguments.coordinates.Coordinates;
-import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.phys.Vec3;
-import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.util.NewMessageUtil;
 import org.bukkit.Location;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.checkerframework.checker.units.qual.N;
 
 public class SlotCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -65,7 +56,6 @@ public class SlotCommand {
                                             return suggestBuilder.buildFuture();
                                         })
                                 .then(Commands.argument("multiplier", IntegerArgumentType.integer()).executes(ctx -> {
-
                                     //todo configに書き込む
                                     return 0;
                                 }))))));
