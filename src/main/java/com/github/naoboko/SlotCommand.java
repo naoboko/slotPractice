@@ -4,6 +4,8 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.context.CommandContextBuilder;
 import net.kyori.adventure.text.Component;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -14,8 +16,8 @@ import org.bukkit.Location;
 
 public class SlotCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        LiteralArgumentBuilder<CommandSourceStack> builder = LiteralArgumentBuilder.literal("Slot");
-        builder.requires(ctx -> ctx.hasPermission(4)).then(Commands.literal("list").executes(ctx -> {
+        LiteralArgumentBuilder<CommandSourceStack> slotCommandBuilder = LiteralArgumentBuilder.literal("Slot");
+        slotCommandBuilder.requires(ctx -> ctx.hasPermission(4)).then(Commands.literal("list").executes(ctx -> {
             Slots.getSlots().forEach(slot -> {
                 Location loc = slot.getLocation();
                 NewMessageUtil.sendMessage(ctx.getSource(), Component.text("id=" + slot.getId() + ", world=" + loc.getWorld().getName() + ", x=" + loc.getBlockX() + ", y=" + loc.getBlockY() + ", z=" + loc.getBlockZ() + ", bet=" + slot.getBet()));
@@ -60,15 +62,33 @@ public class SlotCommand {
                                     return 0;
                                 }))))));
 
-        dispatcher.register(builder);
+        LiteralArgumentBuilder<CommandSourceStack> slotsCommandBuilder = LiteralArgumentBuilder.literal("slots");
+        slotsCommandBuilder.executes(ctx -> {
+            Slots.getSlots().forEach(slot -> {
+                Location loc = slot.getLocation();
+                NewMessageUtil.sendMessage(ctx.getSource(), Component.text("id=" + slot.getId() + ", world=" + loc.getWorld().getName() + ", x=" + loc.getBlockX() + ", y=" + loc.getBlockY() + ", z=" + loc.getBlockZ() + ", bet=" + slot.getBet()));
+            });
+            return 0;
+        });
 
         LiteralArgumentBuilder<CommandSourceStack> debugBuilder = LiteralArgumentBuilder.literal("slotDebug");
                 debugBuilder.requires(ctx -> ctx.hasPermission(4)).executes(ctx -> {
                     SlotProcessing.debug(ctx.getSource().getPlayer().getBukkitEntity());
                     return 0;
                 });
+
+        dispatcher.register(slotCommandBuilder);
+        dispatcher.register(slotsCommandBuilder);
         dispatcher.register(debugBuilder);
 
+
+/*こういうことやりたいけどどうやるかわからん
+        private static void showSlotList(CommandContext<CommandSourceStack> ctx) {
+            Slots.getSlots().forEach(slot -> {
+                Location loc = slot.getLocation();
+                NewMessageUtil.sendMessage(ctx.getSource(), Component.text("id=" + slot.getId() + ", world=" + loc.getWorld().getName() + ", x=" + loc.getBlockX() + ", y=" + loc.getBlockY() + ", z=" + loc.getBlockZ() + ", bet=" + slot.getBet()));
+            });
+        }*/
         //todo slotGeneralInfoみたいなコマンドを実装、全台の返金倍率を変えられるように
         //todo slotBetChangeみたなコマンドを実装、設置されたスロットのbetをid指定で直接変えられるように setBetの出番きたねこれ
     }
