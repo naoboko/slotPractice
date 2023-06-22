@@ -52,10 +52,18 @@ public class Slots {
             slots.getKeys(false).forEach(id -> { //ガッ
                 ConfigurationSection slot = slots.getConfigurationSection(id);
                 Location buttonLoc = ConfigurationSerializer.getLocationData(slot ,"button-location");
-                int bet = slot.getInt("bet"); //ガッ
-                boolean duplicate = slot.getBoolean("duplicate");
-                SLOTS.add(new Slot(Integer.parseInt(id), buttonLoc, bet, duplicate));
+                if (slot != null) {
+                    int bet = slot.getInt("bet");
+                    boolean duplicate = slot.getBoolean("duplicate");
+                    SLOTS.add(new Slot(Integer.parseInt(id), buttonLoc, bet, duplicate));
+                } else {
+                    //このへんはnull出るぞとうるさかったので書いてみました
+                    throw new NullPointerException("slotインスタンスがnullです。");
+                }
             });
+        } else {
+            //このへんはnull出るぞとうるさかったので書いてみました
+            throw new NullPointerException("slotsがnullです。");
         }
     }
 
